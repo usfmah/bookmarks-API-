@@ -181,3 +181,5 @@ pnpm-debug.log*
 .env.local
 # temp directory
 .tmp
+
+/src/generated/prisma
