@@ -8,6 +8,10 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
+    "prisma:dev:deploy": "prisma migrate deploy",
+"db:dev:rm": "docker compose rm dev-db -s -f -v",
+"db:dev:up": "docker compose up dev-db -d",
+"db:dev:restart": "npm db:dev:rm && npm db:dev:up && sleep 1 && npm prisma:dev:deploy",
     "build": "nest build",
     "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
