@@ -6,7 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaService } from './prisma/prisma.service.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
-
+//TODO: add a config moudle with propper configration from @nestjs/congig
 @Module({
   imports: [AuthModule, BookmarkModule, UsersModule, ConfigModule.forRoot({
       isGlobal: true,
