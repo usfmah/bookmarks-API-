@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -8,13 +9,16 @@ datasource db {
 }
 
 model User {
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  email     String   @unique
+  createdAt DateTime   @default(now()) @db.Timestamptz(6)
+  email     String     @unique
   firstName String?
   hash      String
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   lastName  String?
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+  bookmarks Bookmark[]
+
+  @@map("users")
 }
 
 model Bookmark {
@@ -23,5 +27,10 @@ model Bookmark {
   id          Int      @id @default(autoincrement())
   link        String
   title       String
-  updatedAt   DateTime @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("bookmarks")
 }
