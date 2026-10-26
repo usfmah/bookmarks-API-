@@ -3,10 +3,12 @@ import { AuthDto } from './dto/auth.dto.js';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Prisma } from '../generated/prisma/client.js';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 
 @Injectable({})
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
   async signup(dto: AuthDto) {
     
@@ -17,17 +19,11 @@ export class AuthService {
         email: dto.email,
         hash,
       },
-      select: {
-        id: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-        firstName: true,
-        lastName: true,
-      }
     })
 
-    return user;}
+       return this.signToken(user.id, user.email)
+  
+  }
     catch (error) {
         if (
     error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -38,6 +34,7 @@ export class AuthService {
         throw error;
     }
   }
+
   async signin(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
     where: { email: dto.email },
@@ -55,8 +52,25 @@ export class AuthService {
   }
 
 
-    const { hash, ...rest } = user;
-    return rest;
+   return this.signToken(user.id, user.email)
 
+  }
+  
+
+  async signToken(userId: number, email: string): Promise<{ access_token: string }> {
+    const payload = {
+      sub: userId, 
+      email
+    }
+    const secret = process.env.JWT_SECERT
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '15m', 
+      secret: secret
+    })
+    
+    return {
+      access_token: token, 
+    }
   }
 }
