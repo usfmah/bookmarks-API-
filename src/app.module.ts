@@ -10,6 +10,5 @@ import { PrismaModule } from './prisma/prisma.module.js';
   imports: [AuthModule, BookmarkModule, UsersModule, ConfigModule.forRoot({
       isGlobal: true,
     }), PrismaModule,],
-  controllers: [],
 })
 export class AppModule {}
