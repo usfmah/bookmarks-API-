@@ -26,7 +26,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         id: true,
         lastName: true,
         updatedAt: true,
-        bookmarks: true,
       },
     });
 
@@ -35,7 +34,4 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 }
 
 
-// TODO: Use pactumjs to test
-// TODO: Write initatal test with intiating app
-// TODO: Create test database 
-// TODO: Create dev script commands 
+

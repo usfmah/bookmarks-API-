@@ -19,10 +19,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
   
-  cleandb() {
-    return this.$transaction([
-      this.bookmark.deleteMany(),
-      this.user.deleteMany()
-    ])
+  // User deletion cascades to bookmarks (onDelete: Cascade)
+  cleanDb() {
+    return this.user.deleteMany();
   }
 }
