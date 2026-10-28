@@ -4,11 +4,15 @@ import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable({})
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signup(dto: AuthDto) {
     
@@ -62,7 +66,7 @@ export class AuthService {
       sub: userId, 
       email
     }
-    const secret = process.env.JWT_SECERT
+    const secret = this.config.get<string>('JWT_SECRET');
 
     const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m', 
