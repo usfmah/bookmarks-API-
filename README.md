@@ -26,6 +26,7 @@ npm run start:dev         # http://localhost:3000
 | `DATABASE_URL`   | connection string used by the app + Prisma CLI        |
 | `PORT`           | HTTP port (default `3000`)                            |
 | `JWT_SECRET`     | secret for signing tokens                             |
+| `FRONTEND_URL`   | browser origin allowed by CORS (default `http://localhost:5173`) |
 
 `.env` is for development. `.test.env` (same variables, test database on port `5441`) is loaded automatically by the test scripts.
 
