@@ -182,4 +182,10 @@ pnpm-debug.log*
 # temp directory
 .tmp
 
+# agent tooling
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+
 /src/generated/prisma
