@@ -189,4 +189,4 @@ pnpm-debug.log*
 .windsurf/
 skills-lock.json
 
-/src/generated/prisma
+/backend/src/generated/prisma
