@@ -1,0 +1,17 @@
+node_modules
+dist
+coverage
+test
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose*.yml
+.env
+.env.*
+!.env.example
+.vscode
+*.log
+*.tsbuildinfo
+.oxlintrc.json
+src/generated

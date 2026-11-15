@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege: CI only reads the repository.
+permissions:
+  contents: read
+
+# Non-secret, CI-only values for disposable containers. Not production secrets.
+env:
+  POSTGRES_DB: folio
+  POSTGRES_USER: folio
+  POSTGRES_PASSWORD: ci-only-postgres-password
+  JWT_SECRET: ci-only-jwt-secret-not-for-production
+  FRONTEND_URL: http://localhost:4200
+
+jobs:
+  backend:
+    name: Backend — install, generate, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install dependencies (lockfile)
+        working-directory: backend
+        run: npm ci
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
+      - name: Build
+        working-directory: backend
+        run: npm run build
+
+  frontend:
+    name: Frontend — install, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies (lockfile)
+        working-directory: frontend
+        run: npm ci
+      - name: Unit tests
+        working-directory: frontend
+        run: CI=true npm test
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+  docker:
+    name: Docker — compose validation, image builds, smoke tests
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Validate Compose configuration
+        run: docker compose -f compose.yaml config --quiet
+
+      - name: Build images
+        run: docker compose -f compose.yaml build
+
+      - name: Start the stack and wait for health checks
+        run: docker compose -f compose.yaml up -d --wait
+
+      - name: Smoke test — frontend serves the SPA
+        run: |
+          curl -fsS http://localhost:4200/healthz
+          curl -fsS http://localhost:4200/ | grep -qi folio
+
+      - name: Smoke test — backend health through the nginx proxy
+        run: curl -fsS http://localhost:4200/health
+
+      - name: Smoke test — signup → authenticated API call through the proxy
+        run: |
+          TOKEN=$(curl -fsS -X POST http://localhost:4200/auth/signup \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"ci@example.com","password":"ci-password-123"}' | jq -r .access_token)
+          test -n "$TOKEN" && test "$TOKEN" != "null"
+          curl -fsS http://localhost:4200/users/me -H "Authorization: Bearer $TOKEN" | jq -e '.email == "ci@example.com"'
+          BOOKMARK=$(curl -fsS -X POST http://localhost:4200/bookmarks \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"CI smoke","link":"https://example.com"}')
+          echo "$BOOKMARK" | jq -e '.id'
+          curl -fsS http://localhost:4200/bookmarks -H "Authorization: Bearer $TOKEN" | jq -e 'length == 1'
+
+      - name: Cleanup (always)
+        if: always()
+        run: docker compose -f compose.yaml down -v
