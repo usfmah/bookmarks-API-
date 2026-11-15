@@ -36,7 +36,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="given-name"
           formControlName="firstName"
           placeholder="First name"
-          class="mt-2 h-[46px] rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 h-[46px] rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
         />
 
         <label for="lastName" class="mt-6 text-[9px] font-semibold tracking-[0.18em] text-faint"
@@ -48,7 +48,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="family-name"
           formControlName="lastName"
           placeholder="Last name"
-          class="mt-2 h-[46px] rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 h-[46px] rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
         />
 
         <label for="email" class="mt-6 text-[9px] font-semibold tracking-[0.18em] text-faint"
@@ -60,7 +60,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="email"
           formControlName="email"
           placeholder="name@example.com"
-          class="mt-2 h-[46px] rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 h-[46px] rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
           [attr.aria-invalid]="showEmailError()"
         />
         @if (showEmailError()) {

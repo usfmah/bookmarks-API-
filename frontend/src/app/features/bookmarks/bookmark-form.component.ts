@@ -43,7 +43,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="off"
           formControlName="title"
           placeholder="Enter a clear title"
-          class="mt-2 h-[46px] rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 h-[46px] rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
           [attr.aria-invalid]="showError('title')"
         />
         @if (showError('title')) {
@@ -58,7 +58,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="off"
           formControlName="link"
           placeholder="https://"
-          class="mt-2 h-[46px] rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 h-[46px] rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
           [attr.aria-invalid]="showError('link')"
         />
         @if (showError('link')) {
@@ -73,7 +73,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           formControlName="description"
           placeholder="Add a short description (optional)"
           rows="5"
-          class="mt-2 resize-y rounded-[3px] border border-line bg-surface px-4 py-3 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
+          class="mt-2 resize-y rounded-[10px] border border-line bg-surface px-4 py-3 text-[12px] text-text placeholder-faint focus:border-accent focus:outline-none"
         ></textarea>
 
         @if (submitError()) {

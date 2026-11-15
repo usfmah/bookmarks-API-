@@ -28,7 +28,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="email"
           formControlName="email"
           placeholder="name@example.com"
-          class="mt-2 h-12 rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint transition-colors focus:border-accent focus:outline-none"
+          class="mt-2 h-12 rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint transition-colors focus:border-accent focus:outline-none"
           [attr.aria-invalid]="showError('email')"
         />
         @if (showError('email')) {
@@ -42,7 +42,7 @@ import { IconComponent } from '../../shared/ui/icon.component';
           autocomplete="new-password"
           formControlName="password"
           placeholder="Enter a password"
-          class="mt-2 h-12 rounded-[3px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint transition-colors focus:border-accent focus:outline-none"
+          class="mt-2 h-12 rounded-[10px] border border-line bg-surface px-4 text-[12px] text-text placeholder-faint transition-colors focus:border-accent focus:outline-none"
           [attr.aria-invalid]="showError('password')"
         />
         @if (form.controls.password.touched && form.controls.password.invalid) {
