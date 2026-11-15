@@ -30,35 +30,39 @@ DELETE /bookmarks/:id                       → 204 | 403 | 404
 
 ## Run it locally
 
-Requirements: Node.js ≥ 22, Docker, npm.
+### Everything with Docker (recommended)
+
+```bash
+cp .env.example .env   # set POSTGRES_PASSWORD and JWT_SECRET
+docker compose up --build
+```
+
+Then open http://localhost:4200. The entire stack — Angular frontend (nginx), NestJS backend, PostgreSQL — starts with health-checked ordering; the API and database are internal to the Compose network.
+
+Useful commands: `docker compose ps` · `docker compose logs -f` · `docker compose down` (keep DB) · `docker compose down -v` (wipe DB).
+
+Development mode with bind mounts and hot reload:
+
+```bash
+docker compose -f compose.dev.yaml up --build
+```
+
+### Backend without Docker
+
+Requires Node.js ≥ 22 and Docker (for the Postgres container only).
 
 ```bash
 cd backend
 npm install
-cp .env.example .env       # then edit .env — see below
-npx prisma generate        # generated client is not committed
-npm run db:dev:restart     # start Postgres (port 5432) + apply migrations
-npm run start:dev          # http://localhost:PORT (2296 in this workspace, 3000 by default)
+npx prisma generate       # generated client is not committed
+npm run db:dev:restart    # start Postgres (port 5432) + apply migrations
+npm run start:dev         # http://localhost:PORT (2296 in this workspace, 3000 default)
 ```
 
-`.env` values:
+Backend `.env` (from `.env.example`): `DB_*` / `DATABASE_URL` (container credentials), `PORT`, `JWT_SECRET`, `FRONTEND_URL` (allowed browser origin, e.g. `http://localhost:4200`).
 
-| Variable | Purpose |
-|----------|---------|
-| `DB_*` / `DATABASE_URL` | Postgres container credentials / connection string |
-| `PORT` | HTTP port the API listens on |
-| `JWT_SECRET` | JWT signing secret — keep it out of git |
-| `FRONTEND_URL` | allowed browser origin(s), comma-separated (e.g. `http://localhost:4200`) |
+Frontend without Docker: `cd frontend && npm install && npm start` → http://localhost:4200 (dev API URL in `environment.development.ts` — match your backend `PORT`).
 
-Then try it:
-
-```bash
-curl -X POST localhost:2296/auth/signup -H 'Content-Type: application/json' \
-  -d '{"email":"me@example.com","password":"choose-something-long"}'
-```
-
-Tests: `npm run db:test:restart && npm run test:e2e` (uses `.test.env`, test DB on port 5441).
-
-Frontend (optional): `cd frontend && npm install && npm start` → http://localhost:4200. Its dev API URL is set in `frontend/src/environments/environment.development.ts` (match your backend `PORT`).
+Tests: `npm run db:test:restart && npm run test:e2e` in `backend/` (uses `.test.env`, test DB on port 5441).
 
 MIT — see [LICENSE](LICENSE).

@@ -190,3 +190,6 @@ pnpm-debug.log*
 skills-lock.json
 
 /backend/src/generated/prisma
+
+# Personal, not for publication
+DOCKER_REPORT.md
