@@ -5,15 +5,16 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-ink: #071426;
-  --color-panel: #09182c;
-  --color-surface: #0d1e34;
-  --color-active: #122740;
-  --color-line: #25394f;
-  --color-accent: #75b8e8;
-  --color-text: #eaf1f8;
-  --color-muted: #8c9eb3;
-  --color-faint: #5e7590;
+  /* Midnight slate ramp */
+  --color-ink: #06141b; /* level 1 — page background */
+  --color-panel: #11212d; /* level 2 — rail, inspector, auth panel */
+  --color-surface: #253745; /* level 3 — input fills, secondary surfaces */
+  --color-active: #253745; /* level 3 — selected rows / nav / hover fills */
+  --color-line: #253745; /* level 3 — hairline rules and borders */
+  --color-faint: #4a5c6a; /* level 4 — eyebrow labels, disabled text */
+  --color-muted: #9ba8ab; /* level 5 — secondary text */
+  --color-text: #ccd0cf; /* level 6 — primary text */
+  --color-accent: #ccd0cf; /* level 6 — primary actions, selection indicators */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -27,7 +28,7 @@ body {
 }
 
 ::selection {
-  background-color: rgba(117, 184, 232, 0.28);
+  background-color: rgba(204, 208, 207, 0.3);
 }
 
 /* Thin, understated scrollbars to match the archive aesthetic */
