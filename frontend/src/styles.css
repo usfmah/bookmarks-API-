@@ -1,0 +1,60 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #071426;
+  --color-panel: #09182c;
+  --color-surface: #0d1e34;
+  --color-active: #122740;
+  --color-line: #25394f;
+  --color-accent: #75b8e8;
+  --color-text: #eaf1f8;
+  --color-muted: #8c9eb3;
+  --color-faint: #5e7590;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: var(--color-ink);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: rgba(117, 184, 232, 0.28);
+}
+
+/* Thin, understated scrollbars to match the archive aesthetic */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+@keyframes folio-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.folio-spinner {
+  animation: folio-spin 0.8s linear infinite;
+}
+
+@keyframes folio-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.folio-fade-in {
+  animation: folio-fade-in 0.35s ease-out both;
+}
