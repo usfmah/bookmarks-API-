@@ -6,6 +6,9 @@ name: folio
 services:
   db:
     build: ./db
+    image: folio-db:latest
+    networks:
+      - folio_app
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-folio}
       POSTGRES_USER: ${POSTGRES_USER:-folio}
@@ -23,6 +26,9 @@ services:
 
   backend:
     build: ./backend
+    image: folio-backend:latest
+    networks:
+      - folio_app
     ports:
       - "${BACKEND_PORT:-2296}:3000"
     environment:
@@ -41,6 +47,9 @@ services:
 
   frontend:
     build: ./frontend
+    image: folio-frontend:latest
+    networks:
+      - folio_app
     ports:
       - "${FRONTEND_PORT:-4200}:4200"
     environment:
@@ -50,6 +59,11 @@ services:
       - /app/node_modules      # anonymous volume: keep the image's installed dependencies
     depends_on:
       - backend
+
+networks:
+  # Explicit application network — services reach each other by name (Docker DNS)
+  folio_app:
+    driver: bridge
 
 volumes:
   postgres_data:

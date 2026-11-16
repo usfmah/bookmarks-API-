@@ -45,6 +45,8 @@ Useful commands: `docker compose ps` · `docker compose logs -f` · `docker comp
 
 - **One Dockerfile per component** — `db/` (PostgreSQL), `backend/` (NestJS), `frontend/` (Angular)
 - **Docker Compose orchestration** — the whole stack starts with a single `docker compose up`
+- **Named images** — services build tagged images (`folio-db`, `folio-backend`, `folio-frontend`:`latest`)
+- **Explicit bridge network** — all services join the `folio_app` network; containers resolve each other by service name (Docker DNS)
 - **Bind mounts** — host source code (`./backend`, `./frontend`) is mounted into the containers for hot reload
 - **Named volume** (`postgres_data`) — database files survive container recreation
 - **Anonymous volumes** (`/app/node_modules`) — isolate container dependencies from the bind mounts
