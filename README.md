@@ -28,24 +28,42 @@ PATCH  /bookmarks/:id   { title?, link?, description? } → 200 | 403 | 404
 DELETE /bookmarks/:id                       → 204 | 403 | 404
 ```
 
-## Run it locally
-
-### Everything with Docker (recommended)
+## Run it
 
 ```bash
 cp .env.example .env   # set POSTGRES_PASSWORD and JWT_SECRET
 docker compose up --build
 ```
 
-Then open http://localhost:4200. The entire stack — Angular frontend (nginx), NestJS backend, PostgreSQL — starts with health-checked ordering; the API and database are internal to the Compose network.
+That single command starts the whole stack: PostgreSQL, the NestJS backend (applies Prisma migrations, then starts with hot reload), and the Angular frontend.
 
-Useful commands: `docker compose ps` · `docker compose logs -f` · `docker compose down` (keep DB) · `docker compose down -v` (wipe DB).
+- Frontend → http://localhost:4200
+- Backend → http://localhost:2296 (also reachable from the compose network as `backend:3000`)
 
-Development mode with bind mounts and hot reload:
+Useful commands: `docker compose ps` · `docker compose logs -f` · `docker compose stop backend` / `docker compose stop frontend` (independent) · `docker compose down` (keep DB) · `docker compose down -v` (wipe DB).
 
-```bash
-docker compose -f compose.dev.yaml up --build
+## Project structure (Docker)
+
+```text
+.
+├── compose.yaml            # single Compose file orchestrating all three services
+├── db/Dockerfile           # PostgreSQL (FROM postgres:17-alpine)
+├── backend/Dockerfile      # NestJS API (node:22-bookworm-slim + openssl for Prisma)
+├── frontend/Dockerfile     # Angular SPA (node:22-alpine, ng serve)
+├── .env.example            # configuration template (copy to .env)
+├── backend/                # NestJS source, Prisma schema & migrations
+└── frontend/               # Angular source
 ```
+
+How the pieces fit together:
+
+- **`compose.yaml`** orchestrates all three services on one Docker network. Service names become hostnames, so the backend reaches the database at `db:5432`. A single `docker compose up --build` builds and starts everything.
+- **`db/Dockerfile`** — minimal image based on the official Postgres image. The database files live in a **named volume** (`postgres_data`), so they survive container recreation. The DB port is *not* published to the host; only the app services can reach it. A `pg_isready` healthcheck gates backend startup.
+- **`backend/Dockerfile`** — installs dependencies (`npm ci`), generates the Prisma client, applies migrations (`prisma migrate deploy`) and starts the dev server (`nest start --watch`). The source directory is **bind-mounted** into the container (`./backend:/app`) so edits on the host are picked up instantly; an **anonymous volume** (`/app/node_modules`) shields the image's installed `node_modules` from the bind mount.
+- **`frontend/Dockerfile`** — installs dependencies (`npm ci`) and serves the Angular app with `ng serve --host 0.0.0.0`. Same bind-mount + anonymous-volume pattern as the backend (`CHOKIDAR_USEPOLLING=true` ensures file-change detection works on bind mounts).
+- **Volumes summary** — named volume for persistent database data, bind mounts for live source code, anonymous volumes for `node_modules`.
+
+Docker concepts demonstrated: Dockerfiles (one per component), image layers & cache-friendly `npm ci`, Docker Compose orchestration, service discovery via Docker DNS, healthchecks + `depends_on` ordering, bind mounts (hot reload), named volumes (persistence), anonymous volumes (dependency isolation), environment-based configuration via `.env`, and port publishing (`FRONTEND_PORT`, `BACKEND_PORT`).
 
 ### Backend without Docker
 

@@ -74,30 +74,37 @@ jobs:
       - name: Build images
         run: docker compose -f compose.yaml build
 
-      - name: Start the stack and wait for health checks
-        run: docker compose -f compose.yaml up -d --wait
+      - name: Start the stack
+        run: docker compose -f compose.yaml up -d --build
+
+      - name: Wait for the backend to be healthy (migrations applied)
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:2296/health && exit 0
+            sleep 2
+          done
+          echo 'backend did not become healthy in time' >&2
+          exit 1
 
       - name: Smoke test — frontend serves the SPA
-        run: |
-          curl -fsS http://localhost:4200/healthz
-          curl -fsS http://localhost:4200/ | grep -qi folio
+        run: curl -fsS http://localhost:4200/ | grep -qi folio
 
-      - name: Smoke test — backend health through the nginx proxy
-        run: curl -fsS http://localhost:4200/health
+      - name: Smoke test — backend health
+        run: curl -fsS http://localhost:2296/health
 
-      - name: Smoke test — signup → authenticated API call through the proxy
+      - name: Smoke test — signup → authenticated API call
         run: |
-          TOKEN=$(curl -fsS -X POST http://localhost:4200/auth/signup \
+          TOKEN=$(curl -fsS -X POST http://localhost:2296/auth/signup \
             -H 'Content-Type: application/json' \
             -d '{"email":"ci@example.com","password":"ci-password-123"}' | jq -r .access_token)
           test -n "$TOKEN" && test "$TOKEN" != "null"
-          curl -fsS http://localhost:4200/users/me -H "Authorization: Bearer $TOKEN" | jq -e '.email == "ci@example.com"'
-          BOOKMARK=$(curl -fsS -X POST http://localhost:4200/bookmarks \
+          curl -fsS http://localhost:2296/users/me -H "Authorization: Bearer $TOKEN" | jq -e '.email == "ci@example.com"'
+          BOOKMARK=$(curl -fsS -X POST http://localhost:2296/bookmarks \
             -H "Authorization: Bearer $TOKEN" \
             -H 'Content-Type: application/json' \
             -d '{"title":"CI smoke","link":"https://example.com"}')
           echo "$BOOKMARK" | jq -e '.id'
-          curl -fsS http://localhost:4200/bookmarks -H "Authorization: Bearer $TOKEN" | jq -e 'length == 1'
+          curl -fsS http://localhost:2296/bookmarks -H "Authorization: Bearer $TOKEN" | jq -e 'length == 1'
 
       - name: Cleanup (always)
         if: always()

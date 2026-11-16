@@ -1,12 +1,11 @@
-# FOLIO — full-stack application orchestrated with Docker Compose.
+# FOLIO — full-stack application (frontend, backend, database)
 # Start everything with:  docker compose up --build
 # Configuration is read from the root .env file (see .env.example).
 name: folio
 
 services:
   db:
-    image: postgres:17-alpine
-    restart: unless-stopped
+    build: ./db
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-folio}
       POSTGRES_USER: ${POSTGRES_USER:-folio}
@@ -15,79 +14,42 @@ services:
     volumes:
       # Named volume — database files survive container recreation
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - folio
     # No host port published: PostgreSQL is internal to the application network.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 12
-      start_period: 5s
-
-  migrate:
-    # One-shot service: applies Prisma migrations, then exits.
-    build:
-      context: ./backend
-      target: migrator
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-folio}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-folio}
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - folio
-    restart: "no"
 
   backend:
-    build:
-      context: ./backend
-      target: runtime
-    restart: unless-stopped
+    build: ./backend
+    ports:
+      - "${BACKEND_PORT:-2296}:3000"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3000
-      # Service name `db` resolves via Docker DNS on the application network.
+      # Service name `db` resolves via Docker DNS on the compose network
       DATABASE_URL: postgresql://${POSTGRES_USER:-folio}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-folio}
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+    volumes:
+      - ./backend:/app          # bind mount: host source → container (hot reload)
+      - /app/node_modules       # anonymous volume: keep the image's installed dependencies
     depends_on:
       db:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
-    networks:
-      - folio
-    # No host port published: the frontend (nginx) proxies API calls to this service.
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-      start_period: 10s
 
   frontend:
-    build:
-      context: ./frontend
-      target: runtime
-    restart: unless-stopped
+    build: ./frontend
     ports:
-      # Browser entry point — host port configurable via .env
-      - "${FRONTEND_PORT:-4200}:8080"
+      - "${FRONTEND_PORT:-4200}:4200"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"   # reliable file-change detection on bind mounts
+    volumes:
+      - ./frontend:/app        # bind mount: host source → container (hot reload)
+      - /app/node_modules      # anonymous volume: keep the image's installed dependencies
     depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - folio
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
-      interval: 10s
-      timeout: 3s
-      retries: 6
-
-networks:
-  folio:
-    driver: bridge
+      - backend
 
 volumes:
   postgres_data:
